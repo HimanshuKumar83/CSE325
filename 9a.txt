@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <pthread.h>
+
+#define SIZE 10 // Size of the array
+
+// Global array of integers
+int arr[SIZE] = {12, 45, 67, 23, 89, 34, 56, 78, 11, 90};
+
+// Structure to hold the results of the threads
+double avg;
+int max, min;
+
+// Thread function to compute the average
+void* compute_average(void* arg) {
+    int sum = 0;
+    for (int i = 0; i < SIZE; i++) {
+        sum += arr[i];
+    }
+    avg = sum / (double)SIZE;
+    pthread_exit(NULL);
+}
+
+// Thread function to compute the maximum value
+void* compute_max(void* arg) {
+    max = arr[0];
+    for (int i = 1; i < SIZE; i++) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    pthread_exit(NULL);
+}
+
+// Thread function to compute the minimum value
+void* compute_min(void* arg) {
+    min = arr[0];
+    for (int i = 1; i < SIZE; i++) {
+        if (arr[i] < min) {
+            min = arr[i];
+        }
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[3];
+
+    // Create threads to compute the average, max, and min
+    pthread_create(&threads[0], NULL, compute_average, NULL);
+    pthread_create(&threads[1], NULL, compute_max, NULL);
+    pthread_create(&threads[2], NULL, compute_min, NULL);
+
+    // Wait for all threads to finish
+    for (int i = 0; i < 3; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    // Output the results
+    printf("Average: %.2f\n", avg);
+    printf("Maximum: %d\n", max);
+    printf("Minimum: %d\n", min);
+
+    return 0;
+}

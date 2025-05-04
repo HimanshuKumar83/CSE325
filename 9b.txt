@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main() {
+    pid_t pid1, pid2, pid3;
+
+    // Create the first child process p2
+    pid1 = fork();
+
+    if (pid1 < 0) {
+        // Error in fork
+        perror("Fork failed");
+        exit(1);
+    }
+    
+    if (pid1 == 0) {
+        // Child process p2
+        printf("Process p2: My PID = %d, My Parent PID = %d\n", getpid(), getppid());
+
+        // Create the second child process p3
+        pid2 = fork();
+        
+        if (pid2 < 0) {
+            // Error in fork
+            perror("Fork failed");
+            exit(1);
+        }
+        
+        if (pid2 == 0) {
+            // Child process p3
+            printf("Process p3: My PID = %d, My Parent PID = %d\n", getpid(), getppid());
+            // p3 has no children, it will exit immediately
+            exit(0);
+        } else {
+            // p2 waits for p3 to finish
+            wait(NULL);
+            printf("Process p2: My PID = %d, My Parent PID = %d - p3 has finished\n", getpid(), getppid());
+            // p2 has no more tasks, it will exit
+            exit(0);
+        }
+    } else {
+        // p1 waits for p2 to finish
+        wait(NULL);
+        printf("Process p1: My PID = %d, My Parent PID = %d - p2 has finished\n", getpid(), getppid());
+        // p1 has no more tasks, it will exit
+        exit(0);
+    }
+
+    return 0;
+}
